@@ -1,0 +1,999 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Essenze Ads - Gerador de Anúncios com IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Lato', sans-serif;
+      }
+      .font-title {
+        font-family: 'Anton', sans-serif;
+      }
+      .font-subtitle {
+        font-family: 'Lato', sans-serif;
+      }
+       /* Custom scrollbar for a better look in dark mode */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1a1a2e;
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: #4a4a6a;
+        border-radius: 10px;
+        border: 2px solid #1a1a2e;
+      }
+       ::-webkit-scrollbar-thumb:hover {
+        background-color: #6a6a8a;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+      }
+      /* Simple fade-in animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      .bg-grid-slate-800\/\[0\.2\] {
+        background-image: linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px);
+        background-size: 50px 50px;
+        background-position: center center;
+        background-color: #0f0f1b;
+        background-image: linear-gradient(rgba(100, 116, 139, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(100, 116, 139, 0.2) 1px, transparent 1px);
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.8.0",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-[#0f0f1b] text-slate-200">
+    <div id="root"></div>
+    <script type="module">
+      import React, { useState, useCallback, useEffect } from 'https://esm.sh/react@^19.1.0';
+      import ReactDOM from 'https://esm.sh/react-dom@^19.1.0/client';
+      import { GoogleGenAI } from 'https://esm.sh/@google/genai@^1.8.0';
+
+      // --- INLINED APPLICATION CODE ---
+
+      // --- types.ts ---
+      // Interfaces are used for type-checking during development and are not present in the final JavaScript.
+      // They are included here as comments for clarity on the data structures.
+      /*
+        interface AidaCopy {
+          attention: string;
+          interest: string;
+          desire: string;
+          action: string;
+        }
+        interface VideoScene {
+          scene: number;
+          duration: string;
+          shotType: string;
+          visual: string;
+          onScreenText: string;
+          voiceover: string;
+          sfx: string;
+        }
+        interface SocialMediaCaptions {
+            instagram: string;
+            tiktok: string;
+            youtube: string;
+            facebook: string;
+        }
+        interface TargetAudience {
+          description: string;
+          ageRange: string;
+          gender: string;
+          desires: string[];
+          objections: string[];
+        }
+        interface AdVariation {
+          title: string;
+          subtitle: string;
+          targetAudience: TargetAudience;
+        }
+        interface TakePrompt {
+          take_number: number;
+          duration_seconds: number;
+          concept: string;
+          style: string;
+          mood: string;
+          description: string;
+          camera: {
+            angle: string;
+            movement: string;
+            lens: string;
+          };
+          lighting: string;
+          audio: {
+            narration: string;
+            sfx: string;
+            music: string;
+          };
+        }
+        interface ScenePrompt {
+          scene_number: number;
+          total_duration_seconds: number;
+          concept: string;
+          takes: TakePrompt[];
+        }
+        interface GeneratedContent {
+          adVariations: AdVariation[];
+          aidaCopy: AidaCopy;
+          videoScript: VideoScene[];
+          scenePrompts: ScenePrompt[];
+          imageBase64: string;
+          imagePrompt: string;
+          socialMediaCaptions: SocialMediaCaptions;
+        }
+        interface AiResponseJson {
+          adVariations: AdVariation[];
+          aidaCopy: AidaCopy;
+          imagePrompt: string;
+          videoScript: VideoScene[];
+          socialMediaCaptions: SocialMediaCaptions;
+          scenePrompts: ScenePrompt[];
+        }
+        type TextContent = Pick<GeneratedContent, 'adVariations' | 'aidaCopy' | 'socialMediaCaptions' | 'videoScript' | 'scenePrompts'>;
+        interface MarketListing {
+          marketplace: string;
+          title: string;
+          price: string;
+          url: string;
+        }
+      */
+
+      // --- services/geminiService.ts ---
+      if (!process.env.API_KEY) {
+          // In a real scenario, this check might be done server-side or in a build process.
+          // For this self-contained file, we add a UI fallback.
+          const rootDiv = document.getElementById('root');
+          if (rootDiv) {
+             rootDiv.innerHTML = `<div style="padding: 2rem; text-align: center; color: #fecaca; background-color: #7f1d1d; border: 1px solid #991b1b; border-radius: 0.5rem; margin: 2rem;"><strong>Erro de Configuração:</strong> A variável de ambiente API_KEY não foi definida. Por favor, certifique-se de que a API Key do Google AI está configurada corretamente.</div>`;
+          }
+          throw new Error("API_KEY environment variable not set.");
+      }
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+      const parseJsonResponse = (text) => {
+          if (!text) {
+              return null;
+          }
+          let jsonStr = text.trim();
+          const fenceRegex = /^```(\w*)?\s*\n?(.*?)\n?\s*```$/s;
+          const match = jsonStr.match(fenceRegex);
+          if (match && match[2]) {
+              jsonStr = match[2].trim();
+          }
+          try {
+              jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+              return JSON.parse(jsonStr);
+          } catch (e) {
+              console.error("Failed to parse JSON response:", e);
+              console.error("Original text:", text);
+              return null;
+          }
+      };
+
+      const getBasePrompt = (input) => {
+          const productInput = input.type === 'url'
+              ? `Usando a ferramenta de busca, acesse e analise profundamente o conteúdo da URL do produto a seguir: "${input.value}". Extraia todas as informações relevantes: nome do produto, características, benefícios, materiais, dimensões e o público-alvo implícito. Com base nessa análise, crie a campanha.`
+              : `Sua tarefa é criar o pacote de anúncio para o produto descrito abaixo. Produto: "${input.value}"`;
+
+          return `
+              Você é um copywriter sênior, diretor de arte e estrategista de marketing digital de ponta. Sua especialidade é criar campanhas de e-commerce de alta conversão para produtos domésticos, usando técnicas avançadas de neuromarketing.
+              
+              ${productInput}
+
+              A resposta DEVE ser um único objeto JSON válido e nada mais. Antes de finalizar, verifique CUIDADOSAMENTE que a string JSON inteira está sintaticamente correta, sem vírgulas sobrando, com todas as aspas e chaves devidamente fechadas.
+          `;
+      };
+
+      const getMainGenerationInstructions = (basePrompt) => {
+          return `
+              ${basePrompt}
+              O JSON deve conter as seguintes chaves:
+              1.  'adVariations': Um array com 4 objetos. Cada objeto deve ter 'title', 'subtitle', e um objeto 'targetAudience'. O 'title' e 'subtitle' devem explorar um gatilho mental único e persuasivo. O 'targetAudience' DEVE ser o público ideal para AQUELA variação de título/subtítulo e conter as seguintes chaves: 'description' (descrição detalhada do perfil), 'ageRange' (ex: "25-40"), 'gender' (ex: "Mulheres" ou "Ambos"), 'desires' (array de strings com os principais desejos deste público em relação ao produto), e 'objections' (array de strings com as principais objeções ou medos que impedem a compra).
+              2.  'aidaCopy': Um objeto com a estrutura AIDA (Atenção, Interesse, Desejo, Ação). Use gatilhos de escassez, prova social e quebra de objeções.
+              3.  'imagePrompt': Um prompt para 'Imagen 3' que cria uma imagem profissional 9:16, cinematográfica, ultrarrealista, com iluminação de estúdio e espaço para texto. O produto deve ser o herói da imagem, evocando uma emoção positiva.
+              4.  'videoScript': Roteiro detalhado (human-readable) para um vídeo. CADA CENA DEVE TER ENTRE 30 A 40 SEGUNDOS. O roteiro deve ser extremamente persuasivo, usando a estrutura Gancho-Agitação-Solução-CTA. O gancho inicial deve ser magnético. Array de cenas com 'scene', 'duration' (ex: "35s"), 'shotType', 'visual', 'onScreenText', 'voiceover' e 'sfx'.
+              5.  'socialMediaCaptions': Objeto com legendas para 'instagram', 'tiktok', 'youtube', 'facebook', usando emojis, hashtags relevantes e técnicas de copywriting para cada plataforma.
+              6.  'scenePrompts': Um array de prompts de cena, um para cada cena do 'videoScript'. CADA prompt de cena deve ser um objeto que descreve uma cena de 30-40 segundos. Crucialmente, cada objeto de cena deve ser dividido em "takes" de aproximadamente 8 segundos. A estrutura para cada cena é: 'scene_number', 'total_duration_seconds' (soma dos takes), 'concept' (conceito geral da cena), e 'takes' (um array de objetos 'take'). CADA 'take' deve ser um prompt JSON ULTRA DETALHADO para um gerador de vídeo, com 'take_number', 'duration_seconds' (~8s), 'concept', 'style', 'mood', 'description', 'camera' (com 'angle', 'movement', 'lens'), 'lighting' e 'audio' (com 'narration', 'sfx', 'music'). Esta estrutura granular é essencial.
+          `;
+      };
+
+      const generateAdContent = async (input) => {
+          try {
+              const basePrompt = getBasePrompt(input);
+              const generationPrompt = getMainGenerationInstructions(basePrompt);
+
+              const config = {
+                  temperature: 0.95,
+              };
+
+              if (input.type === 'url') {
+                  config.tools = [{ googleSearch: {} }];
+              } else {
+                  config.responseMimeType = "application/json";
+              }
+
+              const request = {
+                  model: "gemini-2.5-flash-preview-04-17",
+                  contents: generationPrompt,
+                  config: config,
+              };
+
+              const textResponse = await ai.models.generateContent(request);
+              const parsedJson = parseJsonResponse(textResponse.text);
+
+              if (!parsedJson?.adVariations?.length || !parsedJson.imagePrompt || !parsedJson.aidaCopy || !parsedJson.videoScript || !parsedJson.socialMediaCaptions || !parsedJson.scenePrompts?.length) {
+                  throw new Error("A IA falhou em gerar conteúdo estruturado. Tente novamente.");
+              }
+
+              const imageBase64 = await regenerateImage(parsedJson.imagePrompt);
+
+              return { ...parsedJson, imageBase64 };
+
+          } catch (error) {
+              console.error("Error generating ad content:", error);
+              throw new Error(`Falha ao gerar o conteúdo: ${error.message}. Por favor, tente novamente.`);
+          }
+      };
+
+      const regenerateImage = async (prompt) => {
+          const imageResponse = await ai.models.generateImages({
+              model: 'imagen-3.0-generate-002',
+              prompt: prompt,
+              config: { numberOfImages: 1, outputMimeType: 'image/jpeg' },
+          });
+
+          if (!imageResponse.generatedImages || imageResponse.generatedImages.length === 0) {
+              throw new Error("A IA falhou em gerar a imagem. O prompt pode ter sido bloqueado por políticas de segurança.");
+          }
+
+          return imageResponse.generatedImages[0].image.imageBytes;
+      };
+
+      const regenerateText = async (input) => {
+          const basePrompt = getBasePrompt(input);
+          const generationPrompt = `
+              ${basePrompt}
+              O JSON deve conter SOMENTE as seguintes chaves, gerando um conjunto NOVO e DIFERENTE de textos criativos e roteiros:
+              1.  'adVariations': Um array com 4 objetos, cada um com 'title', 'subtitle', e um objeto 'targetAudience' detalhado como especificado anteriormente.
+              2.  'aidaCopy': Um objeto com a estrutura AIDA (Atenção, Interesse, Desejo, Ação).
+              3.  'socialMediaCaptions': Objeto com legendas para 'instagram', 'tiktok', 'youtube', 'facebook'.
+              4.  'videoScript': Novo roteiro detalhado (human-readable). CADA CENA DEVE TER ENTRE 30 A 40 SEGUNDOS.
+              5.  'scenePrompts': Um NOVO array de prompts de cena, onde cada cena é dividida em 'takes' de ~8s. Siga a estrutura granular completa, com cada 'take' sendo um prompt JSON ultra detalhado.
+          `;
+
+          const config = {
+              temperature: 1.0,
+          };
+
+          if (input.type === 'url') {
+              config.tools = [{ googleSearch: {} }];
+          } else {
+              config.responseMimeType = "application/json";
+          }
+          
+          const request = {
+              model: "gemini-2.5-flash-preview-04-17",
+              contents: generationPrompt,
+              config: config,
+          };
+          
+          const textResponse = await ai.models.generateContent(request);
+          const parsedJson = parseJsonResponse(textResponse.text);
+
+          if (!parsedJson?.adVariations?.length || !parsedJson.aidaCopy || !parsedJson.socialMediaCaptions || !parsedJson.videoScript || !parsedJson.scenePrompts?.length) {
+              throw new Error("A IA falhou em gerar as variações de texto. Tente novamente.");
+          }
+          
+          return parsedJson;
+      };
+
+      const fetchMarketPrices = async (productName) => {
+          const prompt = `
+              Você é um analista de pesquisa de mercado de e-commerce focado no Brasil.
+              Sua tarefa é pesquisar o produto "${productName}" e encontrar os preços mais baixos e relevantes nos marketplaces: Mercado Livre, Amazon.com.br, e Shopee Brasil.
+
+              Retorne sua resposta como um único objeto JSON contendo uma chave "listings". O valor de "listings" deve ser um array de objetos. Tente encontrar até 3 anúncios de cada marketplace.
+              
+              Cada objeto representa um anúncio e deve conter as chaves: "marketplace", "title", "price", e "url".
+
+              Se você não conseguir encontrar nenhum anúncio relevante para "${productName}", retorne um array vazio para a chave "listings". Exemplo: {"listings": []}.
+              Sob NENHUMA circunstância responda com texto explicativo ou motivos para a falha. Apenas o JSON.
+          `;
+
+          try {
+              const response = await ai.models.generateContent({
+                  model: "gemini-2.5-flash-preview-04-17",
+                  contents: prompt,
+                  config: {
+                      tools: [{ googleSearch: {} }],
+                  },
+              });
+
+              const parsedJson = parseJsonResponse(response.text);
+
+              if (!parsedJson || !Array.isArray(parsedJson.listings)) {
+                  console.error("Parsed JSON is not in the expected format:", parsedJson);
+                  throw new Error("A IA não conseguiu encontrar dados de mercado no formato esperado. Tente refinar sua busca.");
+              }
+
+              return parsedJson.listings;
+          } catch (error) {
+              console.error("Error fetching market prices:", error);
+              throw new Error("Falha ao pesquisar os preços de mercado. A IA pode estar sobrecarregada. Por favor, tente novamente.");
+          }
+      };
+      
+      // --- components/CopyButton.tsx ---
+      const CopyButton = ({ textToCopy }) => {
+          const [isCopied, setIsCopied] = useState(false);
+
+          const handleCopy = useCallback(() => {
+              navigator.clipboard.writeText(textToCopy).then(() => {
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2000);
+              });
+          }, [textToCopy]);
+
+          return (
+              React.createElement('button', {
+                  onClick: handleCopy,
+                  className: `absolute top-3 right-3 p-1.5 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-fuchsia-500 ${
+                      isCopied 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-slate-700/50 text-slate-400 hover:bg-slate-600/70 hover:text-white'
+                  }`,
+                  'aria-label': 'Copiar para a área de transferência'
+              },
+                  isCopied ? (
+                      React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                          React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M5 13l4 4L19 7" })
+                      )
+                  ) : (
+                      React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: "h-5 w-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                          React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" })
+                      )
+                  )
+              )
+          );
+      };
+
+      // --- components/LoadingSpinner.tsx ---
+      const LoadingSpinner = () => {
+        return (
+          React.createElement('div', { className: "flex flex-col items-center justify-center p-8 text-center" },
+            React.createElement('div', { className: "w-16 h-16 border-4 border-dashed rounded-full animate-spin border-fuchsia-500" }),
+            React.createElement('p', { className: "mt-4 text-lg font-semibold text-slate-300" }, "Analisando e criando sua campanha..."),
+            React.createElement('p', { className: "text-sm text-slate-400" }, "A mágica da IA está acontecendo. Isso pode levar um momento.")
+          )
+        );
+      };
+      
+      // --- components/Header.tsx ---
+      const Header = () => {
+          return (
+              React.createElement('header', { className: "py-6 px-4 sm:px-6 lg:px-8 bg-black/30 backdrop-blur-lg border-b border-white/10 sticky top-0 z-20" },
+                  React.createElement('div', { className: "max-w-7xl mx-auto flex items-center justify-center text-center" },
+                      React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: "h-8 w-8 text-fuchsia-500 mr-3", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                          React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" })
+                      ),
+                      React.createElement('h1', { className: "text-2xl sm:text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-purple-500" },
+                          "Essenze Ads"
+                      )
+                  )
+              )
+          );
+      };
+      
+      // --- components/Footer.tsx ---
+      const Footer = () => {
+          return (
+              React.createElement('footer', { className: "w-full mt-24 pb-8" },
+                  React.createElement('div', { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm" },
+                      React.createElement('p', null, "Desenvolvido com IA. Potencializando o E-commerce moderno."),
+                      React.createElement('p', null, `© ${new Date().getFullYear()} Essenze Ads. Todos os direitos reservados.`)
+                  )
+              )
+          );
+      };
+      
+      // --- components/AdGeneratorForm.tsx ---
+      const AdGeneratorForm = ({ onGenerate, isLoading }) => {
+          const [inputType, setInputType] = useState('description');
+          const [description, setDescription] = useState('');
+          const [url, setUrl] = useState('');
+
+          const handleSubmit = (e) => {
+              e.preventDefault();
+              if (isLoading) return;
+
+              if (inputType === 'description' && description.trim()) {
+                  onGenerate({ type: 'description', value: description });
+              } else if (inputType === 'url' && url.trim()) {
+                  onGenerate({ type: 'url', value: url });
+              }
+          };
+          
+          const isGenerateButtonDisabled = isLoading || 
+              (inputType === 'description' ? !description.trim() : !url.trim());
+
+          const TabButton = ({ title, isActive, onClick }) => (
+              React.createElement('button', {
+                  type: "button",
+                  onClick: onClick,
+                  className: `px-4 py-2.5 -mb-px text-sm font-semibold transition-colors duration-200 border-b-2 ${
+                      isActive 
+                      ? 'border-fuchsia-500 text-white' 
+                      : 'border-transparent text-slate-400 hover:text-white'
+                  }`
+              }, title)
+          );
+
+          const InputField = (props) => (
+              React.createElement('input', {
+                  ...props,
+                  className: "w-full px-5 py-4 text-lg bg-slate-800 border border-slate-700 rounded-full shadow-inner focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 transition-shadow duration-200 disabled:opacity-50 text-white placeholder-slate-500"
+              })
+          );
+
+          return (
+              React.createElement('div', { className: "w-full max-w-3xl mx-auto p-6 bg-slate-900/50 rounded-2xl border border-white/10 shadow-2xl shadow-purple-500/10" },
+                  React.createElement('div', { className: "flex justify-center mb-6 border-b border-slate-700" },
+                      React.createElement(TabButton, { title: "Descrever Produto", isActive: inputType === 'description', onClick: () => setInputType('description') }),
+                      React.createElement(TabButton, { title: "Usar URL do Produto", isActive: inputType === 'url', onClick: () => setInputType('url') })
+                  ),
+                  React.createElement('form', { onSubmit: handleSubmit, className: "flex flex-col gap-4" },
+                      inputType === 'description' ? (
+                          React.createElement(InputField, { 
+                              value: description,
+                              onChange: (e) => setDescription(e.target.value),
+                              placeholder: "Ex: 'Luminária de mesa sem fio com controle de toque'",
+                              disabled: isLoading
+                          })
+                      ) : (
+                          React.createElement(InputField, { 
+                              value: url,
+                              onChange: (e) => setUrl(e.target.value),
+                              placeholder: "Ex: 'https://minhaloja.com/produto/...' ",
+                              type: "url",
+                              disabled: isLoading
+                          })
+                      ),
+                      React.createElement('button', {
+                          type: "submit",
+                          disabled: isGenerateButtonDisabled,
+                          className: "w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-fuchsia-500/40 transition-all duration-300 transform hover:scale-105 disabled:from-slate-600 disabled:to-slate-700 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+                      },
+                          isLoading ? (
+                              React.createElement(React.Fragment, null,
+                                  React.createElement('svg', { className: "animate-spin h-5 w-5 text-white", xmlns: "http://www.w3.org/2000/svg", fill: "none", viewBox: "0 0 24 24" },
+                                      React.createElement('circle', { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }),
+                                      React.createElement('path', { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+                                  ),
+                                  React.createElement('span', null, "Gerando...")
+                              )
+                          ) : (
+                              React.createElement(React.Fragment, null,
+                                  React.createElement('span', null, "Gerar Anúncio com IA"),
+                                  React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: "h-6 w-6", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", strokeWidth: 2 },
+                                      React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", d: "M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" })
+                                  )
+                              )
+                          )
+                      )
+                  )
+              )
+          );
+      };
+      
+      // --- components/AdResultDisplay.tsx ---
+      const AdResultDisplay = ({ 
+          content,
+          onRefreshImage,
+          isRefreshingImage,
+          onRefreshText,
+          isRefreshingText 
+      }) => {
+          
+          const { adVariations, aidaCopy, videoScript, imageBase64, socialMediaCaptions, scenePrompts } = content;
+          const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+          const [activeSocialTab, setActiveSocialTab] = useState('instagram');
+
+          const fullAidaText = `ATENÇÃO ✨\n${aidaCopy.attention}\n\nINTERESSE 🤔\n${aidaCopy.interest}\n\nDESEJO 😍\n${aidaCopy.desire}\n\nAÇÃO 🚀\n${aidaCopy.action}`;
+          const fullVideoScriptText = videoScript
+              .map(scene => `CENA ${scene.scene} (${scene.duration})\n🎬 Plano: ${scene.shotType}\n👁️ Visual: ${scene.visual}\n✍️ Texto na Tela: ${scene.onScreenText}\n🎤 Narração: ${scene.voiceover}\n🎵 Áudio: ${scene.sfx}`)
+              .join('\n\n---\n\n');
+
+          const RefreshButton = ({ onClick, isLoading, children }) => (
+              React.createElement('button', {
+                  onClick: onClick,
+                  disabled: isLoading,
+                  className: "mt-4 flex items-center justify-center gap-2 text-sm font-semibold text-fuchsia-300 bg-fuchsia-900/40 px-4 py-2 rounded-full border border-fuchsia-800 hover:bg-fuchsia-900/80 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              }, isLoading ? 
+                  React.createElement('svg', { className: "animate-spin h-5 w-5 text-white", xmlns: "http://www.w3.org/2000/svg", fill: "none", viewBox: "0 0 24 24" },
+                      React.createElement('circle', { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }),
+                      React.createElement('path', { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+                  ) 
+                  : children
+              )
+          );
+
+          const SectionTitle = ({ children, icon, actionButton }) => (
+               React.createElement('div', { className: "flex justify-between items-center mb-4" },
+                  React.createElement('h3', { className: "text-2xl font-bold flex items-center gap-3" },
+                      React.createElement('span', { className: "text-3xl" }, icon),
+                      React.createElement('span', { className: "text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400" },
+                          children
+                      )
+                  ),
+                  actionButton
+               )
+          );
+
+          const TakeAccordionItem = ({ take }) => {
+              const [isOpen, setIsOpen] = useState(false);
+              const jsonText = JSON.stringify(take, null, 2);
+
+              return (
+                  React.createElement('div', { className: "bg-slate-800/60 rounded-lg border border-slate-700 overflow-hidden" },
+                       React.createElement('button', {
+                          onClick: () => setIsOpen(!isOpen),
+                          className: "w-full flex justify-between items-center p-3 text-left"
+                      },
+                          React.createElement('span', { className: "font-semibold text-fuchsia-300 text-sm" }, `Take ${take.take_number} (${take.duration_seconds}s)`),
+                          React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: `h-5 w-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`, fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                            React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M19 9l-7 7-7-7" })
+                          )
+                      ),
+                       isOpen && (
+                          React.createElement('div', { className: "relative p-4 border-t border-slate-700" },
+                              React.createElement(CopyButton, { textToCopy: jsonText }),
+                              React.createElement('pre', { className: "text-xs text-slate-300 whitespace-pre-wrap break-words max-h-64 overflow-y-auto" },
+                                  React.createElement('code', null, jsonText)
+                              )
+                          )
+                      )
+                  )
+              );
+          };
+
+          const SceneAccordion = ({ scene }) => {
+              const [isOpen, setIsOpen] = useState(false);
+
+              return (
+                  React.createElement('div', { className: "bg-slate-950/70 rounded-lg border border-slate-800 overflow-hidden" },
+                      React.createElement('button', {
+                          onClick: () => setIsOpen(!isOpen),
+                          className: "w-full flex justify-between items-center p-4 text-left"
+                      },
+                          React.createElement('div', { className: 'flex flex-col text-left' },
+                              React.createElement('span', { className: "font-bold text-purple-300" }, `Cena ${scene.scene_number}`),
+                              React.createElement('span', { className: 'text-xs text-slate-400 font-mono' }, scene.concept)
+                          ),
+                          React.createElement('div', { className: 'flex items-center gap-4' },
+                              React.createElement('span', { className: 'text-xs font-mono bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded' }, `${scene.total_duration_seconds}s`),
+                              React.createElement('svg', { xmlns: "http://www.w3.org/2000/svg", className: `h-5 w-5 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`, fill: "none", viewBox: "0 0 24 24", stroke: "currentColor" },
+                                React.createElement('path', { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M19 9l-7 7-7-7" })
+                              )
+                          )
+                      ),
+                      isOpen && (
+                          React.createElement('div', { className: "p-4 border-t border-slate-800 space-y-2" },
+                              scene.takes.map(take => (
+                                  React.createElement(TakeAccordionItem, { key: take.take_number, take: take })
+                              ))
+                          )
+                      )
+                  )
+              );
+          };
+
+          const AdVariationCard = ({ variation }) => {
+              const { title, subtitle, targetAudience } = variation;
+              const textToCopy = `TÍTULO: ${title}\nSUBTÍTULO: ${subtitle}\n\nPÚBLICO-ALVO:\n- Perfil: ${targetAudience.description}\n- Idade/Gênero: ${targetAudience.ageRange}, ${targetAudience.gender}\n- Desejos:\n${targetAudience.desires.map(d => `  - ${d}`).join('\n')}\n- Objeções:\n${targetAudience.objections.map(o => `  - ${o}`).join('\n')}`;
+
+              return (
+                  React.createElement('div', { className: "relative p-4 bg-slate-800/50 rounded-lg border border-slate-700 flex flex-col h-full" },
+                      React.createElement(CopyButton, { textToCopy: textToCopy }),
+                      React.createElement('div', { className: "flex-grow" },
+                          React.createElement('h4', { className: "font-title text-xl text-white uppercase tracking-wide" }, title),
+                          React.createElement('p', { className: "font-subtitle text-slate-300 text-sm mt-1" }, subtitle)
+                      ),
+                      React.createElement('div', { className: "mt-4 pt-3 border-t border-slate-700/50" },
+                          React.createElement('h5', { className: "font-bold text-sm text-purple-300 mb-2" }, "🎯 Público-Alvo Ideal:"),
+                          React.createElement('div', { className: "space-y-2 text-xs text-slate-400" },
+                              React.createElement('p', null, React.createElement('strong', { className: "text-slate-300 font-semibold" }, "Perfil:"), ` ${targetAudience.description}`),
+                              React.createElement('p', null, React.createElement('strong', { className: "text-slate-300 font-semibold" }, "Faixa Etária:"), ` ${targetAudience.ageRange} (${targetAudience.gender})`),
+                              React.createElement('div', null,
+                                  React.createElement('strong', { className: "text-slate-300 font-semibold" }, "Desejos Chave:"),
+                                  React.createElement('ul', { className: "list-disc list-inside pl-2 font-light" },
+                                      targetAudience.desires.map((desire, i) => React.createElement('li', { key: i }, desire))
+                                  )
+                              ),
+                              React.createElement('div', null,
+                                  React.createElement('strong', { className: "text-slate-300 font-semibold" }, "Objeções Comuns:"),
+                                   React.createElement('ul', { className: "list-disc list-inside pl-2 font-light" },
+                                      targetAudience.objections.map((objection, i) => React.createElement('li', { key: i }, objection))
+                                  )
+                              )
+                          )
+                      )
+                  )
+              );
+          }
+
+          return (
+              React.createElement('div', { className: "w-full max-w-7xl mx-auto mt-12 animate-fade-in" },
+                  React.createElement('div', { className: "grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12" },
+                      React.createElement('div', { className: "flex flex-col items-center" },
+                           React.createElement('div', { className: "w-full max-w-sm mx-auto bg-slate-900 border-8 border-slate-800 rounded-[2.5rem] shadow-2xl shadow-purple-900/50" },
+                              React.createElement('div', { className: "w-full h-full rounded-[2rem] overflow-hidden" },
+                                   React.createElement('img', { src: imageUrl, alt: "Anúncio gerado pela IA", className: "w-full h-full object-cover aspect-[9/16]" })
+                              )
+                          ),
+                          React.createElement(RefreshButton, { onClick: onRefreshImage, isLoading: isRefreshingImage }, "Gerar Nova Imagem 🪄")
+                      ),
+                      React.createElement('div', { className: "space-y-8" },
+                          React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg" },
+                              React.createElement(SectionTitle, { 
+                                  icon: "💡", 
+                                  actionButton: React.createElement(RefreshButton, { onClick: onRefreshText, isLoading: isRefreshingText }, "Gerar Novos Títulos ✨")
+                              }, "Variações de Anúncios (A/B)"),
+                              React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 gap-4" },
+                                  adVariations.map((variation, index) => (
+                                     React.createElement(AdVariationCard, { key: index, variation: variation })
+                                  ))
+                              )
+                          ),
+                          React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 relative shadow-lg" },
+                               React.createElement(CopyButton, { textToCopy: fullAidaText }),
+                              React.createElement(SectionTitle, { icon: "📢" }, "Copy de Anúncio (AIDA)"),
+                              React.createElement('div', { className: "space-y-4 prose prose-invert prose-p:text-slate-300 prose-strong:text-fuchsia-400" },
+                                 React.createElement('p', null, React.createElement('strong', null, "ATENÇÃO ✨"), React.createElement('br'), aidaCopy.attention),
+                                 React.createElement('p', null, React.createElement('strong', null, "INTERESSE 🤔"), React.createElement('br'), aidaCopy.interest),
+                                 React.createElement('p', null, React.createElement('strong', null, "DESEJO 😍"), React.createElement('br'), aidaCopy.desire),
+                                 React.createElement('p', null, React.createElement('strong', null, "AÇÃO 🚀"), React.createElement('br'), aidaCopy.action)
+                              )
+                          ),
+                          React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg" },
+                              React.createElement(SectionTitle, { icon: "✍️" }, "Legendas para Social Media"),
+                               React.createElement('div', { className: "border-b border-slate-700 mb-4" },
+                                  React.createElement('nav', { className: "-mb-px flex space-x-4 overflow-x-auto", "aria-label": "Tabs" },
+                                      ['instagram', 'tiktok', 'youtube', 'facebook'].map((platform) => (
+                                           React.createElement('button', {
+                                              key: platform,
+                                              onClick: () => setActiveSocialTab(platform),
+                                              className: `${
+                                              activeSocialTab === platform
+                                                  ? 'border-fuchsia-500 text-white'
+                                                  : 'border-transparent text-slate-400 hover:text-white hover:border-slate-500'
+                                              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors capitalize`
+                                          }, platform)
+                                      ))
+                                  )
+                              ),
+                              React.createElement('div', { className: "relative pt-2" },
+                                   React.createElement(CopyButton, { textToCopy: socialMediaCaptions[activeSocialTab] }),
+                                   React.createElement('p', { className: "text-slate-300 whitespace-pre-wrap font-sans text-sm leading-relaxed" }, socialMediaCaptions[activeSocialTab])
+                              )
+                          ),
+                           React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 relative shadow-lg" },
+                              React.createElement(CopyButton, { textToCopy: fullVideoScriptText }),
+                              React.createElement(SectionTitle, { icon: "🎬" }, "Roteiro de Vídeo Profissional"),
+                              React.createElement('div', { className: "space-y-6 max-h-[30rem] overflow-y-auto pr-3 -mr-3" },
+                                  videoScript.map((scene) => (
+                                      React.createElement('div', { key: scene.scene, className: "pb-4 border-b border-slate-700 last:border-b-0" },
+                                          React.createElement('p', { className: "font-bold text-purple-400 text-lg flex justify-between items-center" },
+                                              React.createElement('span', null, `Cena ${scene.scene} ${scene.scene === 1 ? '🔥' : ''}`),
+                                              React.createElement('span', { className: "text-xs font-mono bg-purple-900/50 text-purple-300 px-2 py-0.5 rounded" }, scene.duration)
+                                          ),
+                                          React.createElement('div', { className: "mt-2 space-y-2 text-sm pl-2 border-l-2 border-slate-700" },
+                                              React.createElement('p', null, React.createElement('strong', { className: "font-semibold text-slate-400 w-28 shrink-0 pl-2" }, "🎬 Plano:"), ` ${scene.shotType}`),
+                                              React.createElement('p', null, React.createElement('strong', { className: "font-semibold text-slate-400 w-28 shrink-0 pl-2" }, "👁️ Visual:"), ` ${scene.visual}`),
+                                              React.createElement('p', null, React.createElement('strong', { className: "font-semibold text-slate-400 w-28 shrink-0 pl-2" }, "✍️ Texto:"), ` ${scene.onScreenText}`),
+                                              React.createElement('p', null, React.createElement('strong', { className: "font-semibold text-slate-400 w-28 shrink-0 pl-2" }, "🎤 Narração:"), ` ${scene.voiceover}`),
+                                              React.createElement('p', null, React.createElement('strong', { className: "font-semibold text-slate-400 w-28 shrink-0 pl-2" }, "🎵 Áudio:"), ` ${scene.sfx}`)
+                                          )
+                                      )
+                                  ))
+                              )
+                          ),
+                          React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 relative shadow-lg" },
+                              React.createElement(SectionTitle, { icon: "🤖" }, "Prompts de Cena para IA (JSON)"),
+                               React.createElement('div', { className: "space-y-3 max-h-[30rem] overflow-y-auto pr-2" },
+                                 scenePrompts.map(scene => (
+                                     React.createElement(SceneAccordion, { key: scene.scene_number, scene: scene })
+                                 ))
+                              )
+                          )
+                      )
+                  )
+              )
+          );
+      };
+
+      // --- components/PricingCalculator.tsx ---
+      const PricingCalculator = () => {
+          const [state, setState] = useState({
+              totalProductCostBRL: 40.00,
+              profitMargin: 45,
+              yampFeePercent: 2.00,
+              appMaxFeePercent: 0.99,
+              boletoFee: 1.00,
+              taxPercent: 6.00,
+              adsCost: 15.00,
+              shopifyFee: 150,
+              estimatedMonthlySales: 100,
+          });
+
+          const [results, setResults] = useState({
+              recommendedPrice: 'R$ 0,00',
+              totalOperationalCostPerUnit: 'R$ 0,00',
+              finalProfitPerUnit: 'R$ 0,00',
+              markup: '0.00x',
+              isProfitNegative: false,
+          });
+          
+          const handleInputChange = useCallback((e) => {
+              const { id, value } = e.target;
+              setState(prevState => ({ ...prevState, [id]: parseFloat(value) || 0 }));
+          }, []);
+
+          useEffect(() => {
+              const {
+                  totalProductCostBRL,
+                  profitMargin,
+                  yampFeePercent,
+                  appMaxFeePercent,
+                  taxPercent,
+                  boletoFee,
+                  adsCost,
+                  shopifyFee,
+                  estimatedMonthlySales
+              } = state;
+
+              const shopifyFeePerUnit = estimatedMonthlySales > 0 ? shopifyFee / estimatedMonthlySales : 0;
+              const fixedCostsPerUnit = totalProductCostBRL + adsCost + boletoFee + shopifyFeePerUnit;
+              const variableFeePercentage = (yampFeePercent + appMaxFeePercent + taxPercent) / 100;
+              const priceDenominator = 1 - variableFeePercentage - (profitMargin / 100);
+              const recommendedPrice = priceDenominator > 0 ? fixedCostsPerUnit / priceDenominator : 0;
+              
+              const variableFeeValue = recommendedPrice * variableFeePercentage;
+              const totalOperationalCostPerUnit = variableFeeValue + adsCost + boletoFee + shopifyFeePerUnit;
+              const totalCostPerUnit = totalProductCostBRL + totalOperationalCostPerUnit;
+              const finalProfitPerUnit = recommendedPrice - totalCostPerUnit;
+              const markup = totalCostPerUnit > 0 ? recommendedPrice / totalCostPerUnit : 0;
+
+              setResults({
+                  recommendedPrice: formatCurrency(recommendedPrice),
+                  totalOperationalCostPerUnit: formatCurrency(totalOperationalCostPerUnit),
+                  finalProfitPerUnit: formatCurrency(finalProfitPerUnit),
+                  markup: `${markup.toFixed(2)}x`,
+                  isProfitNegative: finalProfitPerUnit < 0,
+              });
+
+          }, [state]);
+
+          const formatCurrency = (value) => {
+              if (isNaN(value) || !isFinite(value)) return "R$ 0,00";
+              return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+          };
+          
+          const quantityProjections = [10, 25, 50, 100, 250, 500, 1000, 10000];
+          const finalProfitNumber = parseFloat(results.finalProfitPerUnit.replace('R$', '').replace(/\./g, '').replace(',', '.'));
+
+          const InputRow = React.memo(({ label, id, value, onChange, placeholder, type = "number", unit, disabled = false }) => (
+              React.createElement('div', { className: "flex items-center justify-between gap-4 py-2 border-b border-slate-800" },
+                  React.createElement('label', { htmlFor: id, className: "text-sm text-slate-400 whitespace-nowrap" }, label),
+                  React.createElement('div', { className: "relative flex items-center" },
+                      unit === 'R$' && React.createElement('span', { className: "absolute left-3 text-slate-500 text-sm" }, "R$"),
+                      React.createElement('input', {
+                          id: id,
+                          type: type,
+                          value: value,
+                          onChange: onChange,
+                          placeholder: placeholder,
+                          disabled: disabled,
+                          step: "0.01",
+                          className: `w-32 bg-slate-800 border text-right text-white rounded-md shadow-inner transition-colors duration-200 focus:ring-1 focus:border-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed ${unit === 'R$' ? 'pl-8' : 'px-3'} py-1.5 ${disabled ? 'border-slate-700' : 'border-slate-600 focus:ring-fuchsia-500'}`
+                      }),
+                      unit === '%' && React.createElement('span', { className: "absolute right-3 text-slate-500 text-sm" }, "%")
+                  )
+              )
+          ));
+
+          const OutputRow = React.memo(({ label, value, isHighlighted = false, isNegative = false }) => (
+              React.createElement('div', { className: `flex items-center justify-between p-2 rounded-md ${isHighlighted ? 'bg-fuchsia-900/40' : ''}` },
+                  React.createElement('span', { className: `text-sm font-semibold ${isHighlighted ? 'text-fuchsia-300' : 'text-slate-300'}` }, label),
+                  React.createElement('span', { className: `text-sm font-mono font-bold ${isNegative ? 'text-red-400' : (isHighlighted ? 'text-white' : 'text-green-400')}` }, value)
+              )
+          ));
+
+          const Section = ({ title, children }) => (
+              React.createElement('div', { className: "p-6 bg-slate-900/70 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg h-full" },
+                  React.createElement('h3', { className: "text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400 mb-4" }, title),
+                  React.createElement('div', { className: "space-y-2" }, children)
+              )
+          );
+
+          return (
+              React.createElement('div', { className: "max-w-7xl mx-auto p-4 animate-fade-in" },
+                  React.createElement('div', { className: "text-center mb-12" },
+                    React.createElement('h2', { className: "font-title text-4xl sm:text-5xl font-bold tracking-tight text-white text-shadow" }, "Calculadora de Precificação Inteligente"),
+                    React.createElement('p', { className: "mt-4 max-w-2xl mx-auto text-lg text-slate-400 font-subtitle" }, "Calcule o preço de venda ideal para seus produtos, considerando todos os custos e a margem de lucro desejada.")
+                  ),
+                  React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" },
+                      React.createElement(Section, { title: "1. Custos do Produto e Fixos" },
+                          React.createElement(InputRow, { label: "Custo Total do Produto", id: "totalProductCostBRL", value: state.totalProductCostBRL, onChange: handleInputChange, unit: "R$", placeholder: "40.00" }),
+                          React.createElement(InputRow, { label: "Custo Fixo Mensal (Shopify, etc)", id: "shopifyFee", value: state.shopifyFee, onChange: handleInputChange, unit: "R$", placeholder: "150" }),
+                          React.createElement(InputRow, { label: "Vendas Mensais (Estimativa)", id: "estimatedMonthlySales", value: state.estimatedMonthlySales, onChange: handleInputChange, placeholder: "100" })
+                      ),
+                      React.createElement(Section, { title: "2. Taxas e Custos Variáveis" },
+                          React.createElement(InputRow, { label: "Taxa Yampi Checkout", id: "yampFeePercent", value: state.yampFeePercent, onChange: handleInputChange, unit: "%", placeholder: "2.00" }),
+                          React.createElement(InputRow, { label: "Taxa AppMax Gateway", id: "appMaxFeePercent", value: state.appMaxFeePercent, onChange: handleInputChange, unit: "%", placeholder: "0.99" }),
+                          React.createElement(InputRow, { label: "Taxa do Boleto (se aplicável)", id: "boletoFee", value: state.boletoFee, onChange: handleInputChange, unit: "R$", placeholder: "1.00" }),
+                          React.createElement(InputRow, { label: "Imposto Simples Nacional", id: "taxPercent", value: state.taxPercent, onChange: handleInputChange, unit: "%", placeholder: "6.00" })
+                      ),
+                      React.createElement(Section, { title: "3. Margem e Anúncios" },
+                          React.createElement(InputRow, { label: "Margem de Lucro Desejada", id: "profitMargin", value: state.profitMargin, onChange: handleInputChange, unit: "%", placeholder: "45" }),
+                          React.createElement(InputRow, { label: "Custo de Anúncios por Venda (CPA)", id: "adsCost", value: state.adsCost, onChange: handleInputChange, unit: "R$", placeholder: "15.00" })
+                      ),
+                      React.createElement('div', { className: "md:col-span-2 lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-6" },
+                          React.createElement(Section, { title: "Resultados e Preço Sugerido" },
+                              React.createElement('div', { className: "space-y-3" },
+                                  React.createElement(OutputRow, { label: "Custo Operacional por Venda", value: results.totalOperationalCostPerUnit }),
+                                  React.createElement(OutputRow, { label: "Markup sobre o Custo Total", value: results.markup }),
+                                  React.createElement(OutputRow, { label: "Lucro Final por Venda", value: results.finalProfitPerUnit, isNegative: results.isProfitNegative }),
+                                  React.createElement('div', { className: "pt-4" }, 
+                                      React.createElement(OutputRow, { label: "Preço de Venda Recomendado", value: results.recommendedPrice, isHighlighted: true })
+                                  ),
+                                  results.isProfitNegative && React.createElement('p', { className: 'text-xs text-center text-red-400 pt-2' }, 'Atenção: Seu lucro está negativo! Revise seus custos ou margem.')
+                              )
+                          ),
+                          React.createElement(Section, { title: "Projeção de Lucro Mensal" },
+                              React.createElement('div', { className: 'space-y-2 max-h-48 overflow-y-auto pr-2' },
+                                  quantityProjections.map(q => (
+                                      React.createElement('div', { key: q, className: `flex justify-between text-sm ${state.estimatedMonthlySales === q ? 'text-fuchsia-300 font-bold' : 'text-slate-400'}` },
+                                          React.createElement('span', null, `${q} vendas/mês:`),
+                                          React.createElement('span', { className: 'font-mono' }, formatCurrency(finalProfitNumber * q))
+                                      )
+                                  ))
+                              )
+                          )
+                      )
+                  )
+              )
+          );
+      };
+
+      // --- App.tsx ---
+      const App = () => {
+          const [activeTool, setActiveTool] = useState('generator'); // 'generator', 'calculator'
+          const [isLoading, setIsLoading] = useState(false);
+          const [isRefreshingImage, setIsRefreshingImage] = useState(false);
+          const [isRefreshingText, setIsRefreshingText] = useState(false);
+          const [error, setError] = useState('');
+          const [generatedContent, setGeneratedContent] = useState(null);
+          const [lastInput, setLastInput] = useState(null);
+
+          const handleGenerate = async (input) => {
+              setIsLoading(true);
+              setError('');
+              setGeneratedContent(null);
+              setLastInput(input);
+              try {
+                  const content = await generateAdContent(input);
+                  setGeneratedContent(content);
+              } catch (err) {
+                  setError(err.message);
+              } finally {
+                  setIsLoading(false);
+              }
+          };
+          
+          const handleRefreshImage = async () => {
+              if (!generatedContent || !generatedContent.imagePrompt) return;
+              setIsRefreshingImage(true);
+              setError('');
+              try {
+                  const newImageBase64 = await regenerateImage(generatedContent.imagePrompt);
+                  setGeneratedContent(prev => ({ ...prev, imageBase64: newImageBase64 }));
+              } catch (err) {
+                  setError(err.message);
+              } finally {
+                  setIsRefreshingImage(false);
+              }
+          };
+
+          const handleRefreshText = async () => {
+              if (!lastInput) return;
+              setIsRefreshingText(true);
+              setError('');
+              try {
+                  const newTextContent = await regenerateText(lastInput);
+                  setGeneratedContent(prev => ({ ...prev, ...newTextContent }));
+              } catch (err) {
+                  setError(err.message);
+              } finally {
+                  setIsRefreshingText(false);
+              }
+          };
+
+          const ToolTabButton = ({ title, isActive, onClick }) => (
+              React.createElement('button', {
+                  onClick: onClick,
+                  className: `px-4 sm:px-6 py-3 text-sm sm:text-base font-bold transition-all duration-300 rounded-t-lg border-b-2 ${
+                      isActive 
+                      ? 'bg-slate-900/70 border-fuchsia-500 text-white' 
+                      : 'bg-transparent border-transparent text-slate-400 hover:text-white hover:border-slate-500'
+                  }`
+              }, title)
+          );
+
+          return (
+              React.createElement('div', { className: "min-h-screen flex flex-col bg-grid-slate-800/[0.2]" },
+                  React.createElement(Header, null),
+                  React.createElement('main', { className: "flex-grow container mx-auto px-4 py-8 sm:py-12" },
+                      React.createElement('div', { className: "text-center mb-12" },
+                          React.createElement('h2', { className: "font-title text-4xl sm:text-5xl font-bold tracking-tight text-white text-shadow" }, "Suíte de IA para E-commerce"),
+                          React.createElement('p', { className: "mt-4 max-w-2xl mx-auto text-lg text-slate-400 font-subtitle" }, "Crie campanhas, calcule preços e domine seu mercado. Tudo em um só lugar.")
+                      ),
+                      React.createElement('div', { className: "flex justify-center border-b border-white/10 mb-8" },
+                          React.createElement(ToolTabButton, { title: "Gerador de Anúncios", isActive: activeTool === 'generator', onClick: () => setActiveTool('generator') }),
+                          React.createElement(ToolTabButton, { title: "Calculadora de Preços", isActive: activeTool === 'calculator', onClick: () => setActiveTool('calculator') })
+                      ),
+
+                      activeTool === 'generator' && React.createElement('div', { className: "animate-fade-in" },
+                          React.createElement(AdGeneratorForm, { onGenerate: handleGenerate, isLoading: isLoading }),
+                          isLoading && React.createElement('div', { className: "mt-12 flex justify-center" }, React.createElement(LoadingSpinner, null)),
+                          error && React.createElement('div', { className: "mt-8 max-w-2xl mx-auto p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-lg text-center" }, error),
+                          generatedContent && React.createElement(AdResultDisplay, { 
+                              content: generatedContent,
+                              onRefreshImage: handleRefreshImage,
+                              isRefreshingImage: isRefreshingImage,
+                              onRefreshText: handleRefreshText,
+                              isRefreshingText: isRefreshingText
+                          })
+                      ),
+
+                      activeTool === 'calculator' && React.createElement('div', { className: "animate-fade-in" },
+                          React.createElement(PricingCalculator, null)
+                      )
+
+                  ),
+                  React.createElement(Footer, null)
+              )
+          );
+      };
+
+      // --- Render App ---
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(App, null));
+
+    </script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
